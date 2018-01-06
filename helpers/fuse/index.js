@@ -10,7 +10,7 @@ module.exports = ({ mountPath }) => {
       fuse.mount(mountPath, {
         readdir: function (path, cb) {
           console.log('readdir(%s)', path)
-          if (path === '/') return cb(0, ['test'])
+          if (path === '/') return cb(0, ['helloworld.txt'])
           cb(0)
         },
         getattr: function (path, cb) {
@@ -29,7 +29,7 @@ module.exports = ({ mountPath }) => {
             return
           }
 
-          if (path === '/test') {
+          if (path === '/helloworld.txt') {
             cb(0, {
               mtime: new Date(),
               atime: new Date(),
