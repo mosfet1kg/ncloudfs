@@ -2,6 +2,7 @@ const fuse = require('fuse-bindings');
 const ncloudFs = require('../ncloudApi');
 const permission = require('./permission');
 const fs = require('fs');
+const rimraf = require('rimraf');
 const join = require('path').join;
 
 module.exports = ({ mountPath }) => {
@@ -68,20 +69,29 @@ module.exports = ({ mountPath }) => {
         },
         open: function (path, flags, cb) {
           console.log('open(%s, %d)', path, flags);
-          cb(0, 42) // 42 is an fd
+
+          const dir = '/Users/gbchoi/Documents/workspace/myfuse/.mnt';
+
+          if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir, 0o777);
+          }
+
+          const fd = fs.openSync( join(dir, path), 'w+');
+
+          cb(0, fd);
         },
-        // release: function (path, fd, cb) {
-        //   console.log( 'release:', path, 'fd:', fd );
-        //   cb(0);
-        //   // fs.close( fd, (err, res) => {
-        //   //   if ( err ) {
-        //   //     console.log( err );
-        //   //     return cb(0);
-        //   //   }
-        //   //
-        //   //   cb(0);
-        //   // })
-        // },
+        release: function (path, fd, cb) {
+          console.log( 'release:', path, 'fd:', fd );
+          // cb(0);
+          fs.close( fd, (err, res) => {
+            if ( err ) {
+              console.log( err );
+              return cb(0);
+            }
+
+            cb(0);
+          })
+        },
         // write(path, fd, buffer, length, position, cb) {
         //   console.log( path, fd);
         // },
@@ -96,6 +106,12 @@ module.exports = ({ mountPath }) => {
         if (err) {
           console.log('filesystem at ' + mountPath + ' not unmounted', err)
         } else {
+          const dir = '/Users/gbchoi/Documents/workspace/myfuse/.mnt';
+
+          rimraf(dir, () => {
+            console.log('done');
+          });
+
           console.log('filesystem at ' + mountPath + ' unmounted')
         }
       });

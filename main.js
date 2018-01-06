@@ -8,7 +8,7 @@ ncloudFs.connect({
 // const mountPath = path.join('./mnt'); //process.platform !== 'win32' ? path.join('./mnt') : 'M:\\';
 
 const path = require('path');
-const fuse = require('./helpers/fuse')({ mountPath: path.join('./mnt') });
+const fuse = require('./helpers/fuse')({ mountPath: path.join( __dirname, './mnt') });
 fuse.mount();
 
 process.on('SIGINT', function () {
