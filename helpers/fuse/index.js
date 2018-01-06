@@ -64,8 +64,9 @@ module.exports = ({ mountPath }) => {
               return cb(0);
             }
 
-            buf.write(data);
-            return cb( parseInt(length) );
+            data.copy( buf );
+
+            return cb(  data.byteLength );
           });
         },
         open: function (path, flags, cb) {
@@ -93,10 +94,7 @@ module.exports = ({ mountPath }) => {
 
             cb(0);
           })
-        },
-        // write(path, fd, buffer, length, position, cb) {
-        //   console.log( path, fd);
-        // },
+        }
       }, (err) => {
         if (err) throw err;
         console.log('filesystem mounted on ' + mountPath)

@@ -52,7 +52,6 @@ function getAllFileInfo ({container, key}, callback) {
   let params = {
     container,
     key,
-    // listMarker:'kickass2.mkv',
   };
 
   const listener = ()=>{
