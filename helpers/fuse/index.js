@@ -14,90 +14,27 @@ module.exports = ({ mountPath }) => {
           cb(0)
         },
         getattr: function (path, cb) {
-          console.log('getattr(%s)', path)
-          // if (path === '/') {
-          //   cb(0, {
-          //     mtime: new Date(),
-          //     atime: new Date(),
-          //     ctime: new Date(),
-          //     nlink: 1,
-          //     size: 100,
-          //     mode: 16877,
-          //     uid: process.getuid ? process.getuid() : 0,
-          //     gid: process.getgid ? process.getgid() : 0
-          //   })
-          //   return
-          // }
-          //
-          // if (path === '/helloworld.txt') {
-          //   cb(0, {
-          //     mtime: new Date(),
-          //     atime: new Date(),
-          //     ctime: new Date(),
-          //     nlink: 1,
-          //     size: 12,
-          //     mode: 33188,
-          //     uid: process.getuid ? process.getuid() : 0,
-          //     gid: process.getgid ? process.getgid() : 0
-          //   })
-          //   return
-          // }
-          //
-          // cb(fuse.ENOENT)
+          console.log('getattr(%s)', path);
 
           ncloudFs.getFileAttr({ container: 'helloworld1', key: path }, (error, response) => {
-            // if ( error ) {
-            //   return cb(fuse.ENOENT);
-            // }
-            //
-            // const { ['last-modified']: lastModified, ['resource-type']: resourceType, size} = response;
-            // const metaData = {
-            //   // mtime: new Date(parseInt( lastModified )),
-            //   // atime: new Date(parseInt( lastModified )),
-            //   // ctime: new Date(parseInt( lastModified )),
-            //   mtime: new Date(),
-            //   atime: new Date(),
-            //   ctime: new Date(),
-            //   nlink: 1,
-            //   size: parseInt(size),
-            //   mode: (resourceType.toString() === '1' || resourceType.toString() === '2') ? permission.FOLDER : permission.REG_FILE,
-            //   uid: process.getuid ? process.getuid() : 0,
-            //   gid: process.getgid ? process.getgid() : 0
-            // };
-            // console.log( metaData );
-            // cb(0, metaData);
-
-            if (path === '/') {
-              cb(0, {
-                mtime: new Date(),
-                atime: new Date(),
-                ctime: new Date(),
-                nlink: 1,
-                size: 100,
-                mode: 16877,
-                uid: process.getuid ? process.getuid() : 0,
-                gid: process.getgid ? process.getgid() : 0
-              })
-              return
+            if ( error ) {
+              return cb(fuse.ENOENT);
             }
 
-            if (path === '/helloworld.txt') {
-              cb(0, {
-                mtime: new Date(),
-                atime: new Date(),
-                ctime: new Date(),
-                nlink: 1,
-                size: 12,
-                mode: 33188,
-                uid: process.getuid ? process.getuid() : 0,
-                gid: process.getgid ? process.getgid() : 0
-              })
-              return
-            }
-
-            cb(fuse.ENOENT)
+            const { ['last-modified']: lastModified, ['resource-type']: resourceType, size} = response;
+            const metaData = {
+              mtime: new Date(parseInt( lastModified )),
+              atime: new Date(parseInt( lastModified )),
+              ctime: new Date(parseInt( lastModified )),
+              nlink: 1,
+              size: parseInt(size),
+              mode: (resourceType.toString() === '1' || resourceType.toString() === '2') ? permission.FOLDER : permission.REG_FILE,
+              uid: process.getuid ? process.getuid() : 0,
+              gid: process.getgid ? process.getgid() : 0
+            };
+            console.log( metaData );
+            cb(0, metaData);
           });
-
         },
         open: function (path, flags, cb) {
           console.log('open(%s, %d)', path, flags)
@@ -120,8 +57,6 @@ module.exports = ({ mountPath }) => {
             buf.write(data);
             return cb( parseInt(length) );
           });
-
-
         },
         // write(path, fd, buffer, length, position, cb) {
         //   console.log( path, fd);
