@@ -4,6 +4,7 @@ const permission = require('./permission');
 const fs = require('fs');
 const rimraf = require('rimraf');
 const join = require('path').join;
+const dirname = require('path').dirname;
 
 module.exports = ({ mountPath }) => {
   return {
@@ -12,7 +13,7 @@ module.exports = ({ mountPath }) => {
         readdir: function (path, cb) {
           console.log('readdir(%s)', path);
 
-          ncloudFs.getAllFileList({ container: 'helloworld1', key: path }, (error, fileList) => {
+          ncloudFs.getAllFileList({ container: 'helloworld', key: path }, (error, fileList) => {
             if ( error ) {
               console.log( error );
               return cb(0);
@@ -29,7 +30,7 @@ module.exports = ({ mountPath }) => {
         getattr: function (path, cb) {
           console.log('getattr(%s)', path);
 
-          ncloudFs.getFileAttr({ container: 'helloworld1', key: path }, (error, response) => {
+          ncloudFs.getFileAttr({ container: 'helloworld', key: path }, (error, response) => {
             if ( error ) {
               return cb(fuse.ENOENT);
             }
@@ -51,7 +52,7 @@ module.exports = ({ mountPath }) => {
         },
         read: function (path, fd, buf, len, pos, cb) {
           console.log('read(%s, %d, %d, %d)', path, fd, len, pos);
-          ncloudFs.readFile({ container:'helloworld1', key: path, pos, len}, (error, response) => {
+          ncloudFs.readFile({ container:'helloworld', key: path, pos, len}, (error, response) => {
             if ( error ) {
               console.log( error );
               return cb(0);
@@ -70,13 +71,14 @@ module.exports = ({ mountPath }) => {
         open: function (path, flags, cb) {
           console.log('open(%s, %d)', path, flags);
 
-          const dir = '/Users/gbchoi/Documents/workspace/myfuse/.mnt';
+          const absolutePath = join('/Users/gbchoi/Documents/workspace/myfuse/.mnt', path);
+          const dir = dirname( absolutePath );
 
           if (!fs.existsSync(dir)){
-            fs.mkdirSync(dir, 0o777);
+            fs.mkdirSync(dir);
           }
 
-          const fd = fs.openSync( join(dir, path), 'w+');
+          const fd = fs.openSync( absolutePath, 'w+');
 
           cb(0, fd);
         },
