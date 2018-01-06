@@ -44,13 +44,9 @@ module.exports = ({ mountPath }) => {
               uid: process.getuid ? process.getuid() : 0,
               gid: process.getgid ? process.getgid() : 0
             };
-            console.log( metaData );
+
             cb(0, metaData);
           });
-        },
-        open: function (path, flags, cb) {
-          console.log('open(%s, %d)', path, flags)
-          cb(0, 42) // 42 is an fd
         },
         read: function (path, fd, buf, len, pos, cb) {
           console.log('read(%s, %d, %d, %d)', path, fd, len, pos);
@@ -70,9 +66,10 @@ module.exports = ({ mountPath }) => {
             return cb( parseInt(length) );
           });
         },
-        // write(path, fd, buffer, length, position, cb) {
-        //   console.log( path, fd);
-        // },
+        open: function (path, flags, cb) {
+          console.log('open(%s, %d)', path, flags);
+          cb(0, 42) // 42 is an fd
+        },
         // release: function (path, fd, cb) {
         //   console.log( 'release:', path, 'fd:', fd );
         //   cb(0);
@@ -84,7 +81,10 @@ module.exports = ({ mountPath }) => {
         //   //
         //   //   cb(0);
         //   // })
-        // }
+        // },
+        // write(path, fd, buffer, length, position, cb) {
+        //   console.log( path, fd);
+        // },
       }, (err) => {
         if (err) throw err;
         console.log('filesystem mounted on ' + mountPath)
