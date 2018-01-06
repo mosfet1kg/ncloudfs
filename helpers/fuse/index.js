@@ -9,9 +9,21 @@ module.exports = ({ mountPath }) => {
     mount: ()=>{
       fuse.mount(mountPath, {
         readdir: function (path, cb) {
-          console.log('readdir(%s)', path)
-          if (path === '/') return cb(0, ['helloworld.txt']);
-          cb(0)
+          console.log('readdir(%s)', path);
+
+          ncloudFs.getAllFileList({ container: 'helloworld1', key: path }, (error, fileList) => {
+            if ( error ) {
+              console.log( error );
+              return cb(0);
+            }
+
+            if ( fileList.length > 0 ) {
+              console.log( fileList );
+              return cb(0, fileList);
+            }
+
+            cb(0);
+          });
         },
         getattr: function (path, cb) {
           console.log('getattr(%s)', path);
