@@ -14,16 +14,15 @@ module.exports = ({ mountPath }) => {
           ncloudFs.getAllFileList({ container: 'helloworld1', key: path }, (error, fileList) => {
             if ( error ) {
               console.log( error );
-              return cb(fuse.ENOENT);
+              return cb(0);
             }
 
             if ( fileList.length > 0 ) {
               console.log( fileList );
-              cb(0, fileList);
-            } else {
-              console.log('d');
-              cb(0)
+              return cb(0, fileList);
             }
+
+            cb(0);
           });
         },
         getattr: function (path, cb) {
@@ -36,9 +35,12 @@ module.exports = ({ mountPath }) => {
 
             const { ['last-modified']: lastModified, ['resource-type']: resourceType, size} = response;
             const metaData = {
-              mtime: new Date(parseInt( lastModified )),
-              atime: new Date(parseInt( lastModified )),
-              ctime: new Date(parseInt( lastModified )),
+              // mtime: new Date(parseInt( lastModified )),
+              // atime: new Date(parseInt( lastModified )),
+              // ctime: new Date(parseInt( lastModified )),
+              mtime: new Date(),
+              atime: new Date(),
+              ctime: new Date(),
               nlink: 1,
               size: parseInt(size),
               mode: (resourceType.toString() === '1' || resourceType.toString() === '2') ? permission.FOLDER : permission.REG_FILE,
@@ -46,9 +48,8 @@ module.exports = ({ mountPath }) => {
               gid: process.getgid ? process.getgid() : 0
             };
             console.log( metaData );
-            return cb(0, metaData);
+            cb(0, metaData);
           });
-
         },
         open: function (path, flags, cb) {
           const toFlag = function(flags) {
@@ -60,15 +61,15 @@ module.exports = ({ mountPath }) => {
 
           console.log('open(%s, %d)', path, flags);
           console.log(toFlag(flags));
-          // cb(0, 42);
+          cb(0, 42);
           //join('/Users/gbchoi/Documents/workspace/myfuse/testfolder', path)
-          fs.open( join('/Users/gbchoi/Documents/workspace/myfuse/testfolder', path), 'w+', (err, fd)=>{
-            if ( err ) {
-              return console.log( err );
-            }
-            console.log( 'fd: ', fd );
-            cb(0, fd);
-          });
+          // fs.open( join('/Users/gbchoi/Documents/workspace/myfuse/testfolder', path), 'w+', (err, fd)=>{
+          //   if ( err ) {
+          //     return console.log( err );
+          //   }
+          //   console.log( 'fd: ', fd );
+          //   cb(0, fd);
+          // });
         },
         read: function (path, fd, buf, len, pos, cb) {
           console.log('read(%s, %d, %d, %d)', path, fd, len, pos);
@@ -85,27 +86,32 @@ module.exports = ({ mountPath }) => {
             }
 
             const { data, length } = response;
-            console.log( data );
-            buf.write( data );
+
+            if ( length === 0 ) {
+              return cb(0);
+            }
+
+            console.log( data, data.length, length );
+            buf.write( data.slice(0,len) );
             cb(length);
           })
 
         },
-        write(path, fd, buffer, length, position, cb) {
-          console.log( path, fd);
-        },
-        release: function (path, fd, cb) {
-          console.log( 'release:', path, 'fd:', fd );
-          // cb(0);
-          fs.close( fd, (err, res) => {
-            if ( err ) {
-              console.log( err );
-              return cb(0);
-            }
-
-            cb(0);
-          })
-        }
+        // write(path, fd, buffer, length, position, cb) {
+        //   console.log( path, fd);
+        // },
+        // release: function (path, fd, cb) {
+        //   console.log( 'release:', path, 'fd:', fd );
+        //   cb(0);
+        //   // fs.close( fd, (err, res) => {
+        //   //   if ( err ) {
+        //   //     console.log( err );
+        //   //     return cb(0);
+        //   //   }
+        //   //
+        //   //   cb(0);
+        //   // })
+        // }
       }, (err) => {
         if (err) throw err;
         console.log('filesystem mounted on ' + mountPath)
